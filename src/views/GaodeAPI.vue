@@ -4,7 +4,13 @@
     <div id="map" style="width: 98vw; height: 89vh"></div>
     <div id="position"></div>
     <div style="position: absolute; top: 50px; left: 50px">
+      <button @click="routePlayback">路径回放</button>
       路程距离：{{ this.distance }}
+      <label for="speed">
+        运动速度:&nbsp;
+        <input id="speed" type="range" step="10" value="100" />
+      </label>
+      <button @click="handlePlay">{{ textContent }}</button>
     </div>
   </div>
 </template>
@@ -17,9 +23,11 @@ import { transform } from 'ol/proj'
 import { Vector as VectorSource, XYZ as XYZSource } from 'ol/source'
 import * as olControl from 'ol/control'
 import * as olInteraction from 'ol/interaction'
-import { Stroke, Style, Fill, Circle } from 'ol/style'
+import { Stroke, Style, Fill, Circle, Icon } from 'ol/style'
 import Feature from 'ol/Feature'
 import { Point, Polygon, LineString } from 'ol/geom'
+import { getVectorContext } from 'ol/render'
+
 export default {
   name: 'GaodeAPI',
   data() {
@@ -28,6 +36,7 @@ export default {
       pointLayer: null,
       polygonLayer: null,
       lineLayer: null,
+      drawLayer: null,
       pointsData: [],
       polygonData: [],
       lineData: [],
@@ -37,6 +46,20 @@ export default {
           lineCoordinate: [],
         },
       ],
+      lineLength: null,
+      markerFeature: null,
+      textContent: '开始',
+      isMarkMove: false,
+      now: null,
+      speed: null,
+      markStyle: new Style({
+        image: new Icon({
+          anchor: [0.5, 1], // 偏移位置
+          // rotation: 0, // 旋转
+          // size: [100, 100], // 图标大小
+          src: require('@/assets/walking.png'),
+        }),
+      }),
     }
   },
   created() {
@@ -115,7 +138,7 @@ export default {
   },
   mounted() {
     this.initMap()
-    this.getRoute()
+    this.routePlayback()
     this.$nextTick(() => {
       // 模拟点动
       for (let i = 0; i < 10; i++) {
@@ -302,11 +325,86 @@ export default {
           },
           []
         )
-        console.log(this.pointLine)
-        console.log(this.pointLine[0].lineCoordinate)
+        this.lineLength = this.pointLine[0].lineCoordinate.length
         this.renderLineLayer(this.pointLine)
       }
-      console.log(res)
+    },
+    // 路径回放
+    async routePlayback() {
+      await this.getRoute()
+      console.log(this.pointLine[0].lineCoordinate[0])
+      this.markerFeature = new Feature({
+        geometry: new Point(
+          transform(
+            this.pointLine[0].lineCoordinate[0],
+            'EPSG:4326',
+            'EPSG:3857'
+          )
+        ),
+      })
+      this.drawLayer = new VectorLayer({
+        source: new VectorSource({
+          features: [this.markerFeature],
+        }),
+        style: this.markStyle,
+      })
+      this.map.addLayer(this.drawLayer)
+    },
+    handlePlay() {
+      if (this.textContent === '暂停') {
+        this.stop()
+      } else {
+        this.start()
+      }
+    },
+    moveFeature(event) {
+      let vectorContext = getVectorContext(event)
+      // console.log(Math.random() * 2 + vectorContext)
+      let frameState = event.frameState
+      if (this.isMarkMove) {
+        let elapsedTime = frameState.time - this.now
+        let index = Math.round((this.speed * elapsedTime) / 1000)
+        if (index >= this.lineLength) {
+          this.stop()
+          return
+        }
+        console.log(22222222222222)
+
+        const currentPoint = new Point(
+          transform(
+            this.pointLine[0].lineCoordinate[index],
+            'EPSG:4326',
+            'EPSG:3857'
+          )
+        )
+        const feature = new Feature(currentPoint)
+        vectorContext.drawFeature(feature, this.markStyle)
+        this.map.render() // 开始移动动画
+      }
+    },
+    start() {
+      console.log(111)
+      if (this.isMarkMove) {
+        this.stop()
+      } else {
+        console.log(111111111111)
+        this.isMarkMove = true
+        this.textContent = '暂停'
+        this.now = new Date().getTime()
+        this.speed = document.getElementById('speed').value
+        this.markerFeature.setStyle(null) // hide geoMarker 隐藏标记
+        // this.map.removeLayer(this.drawLayer)
+        // this.map.getView().setCenter(this.center) // 设置下中心点
+        console.log(11111122222)
+        this.drawLayer.on('postrender', this.moveFeature)
+        this.map.render()
+      }
+    },
+    stop() {
+      console.log(33333333333)
+      this.isMarkMove = false
+      this.textContent = '开始'
+      this.drawLayer.un('postrender', this.moveFeature) // 删除侦听器
     },
   },
 }

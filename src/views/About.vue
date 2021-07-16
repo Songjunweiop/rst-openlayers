@@ -12,7 +12,7 @@
       运动速度:&nbsp;
       <input id="speed" type="range" step="10" value="100" />
     </label>
-    <button @click="handlerPlay">{{ textContent }}</button>
+    <!-- <button @click="handlerPlay">{{ textContent }}</button> -->
   </div>
 </template>
 
@@ -44,7 +44,7 @@ export default {
       map: null,
       progress: 0, // 进度
       animating: false, // 动画是否开始
-      speed: 500, // 速度
+      speed: null, // 速度
       now: null, // 当前时间
       textContent: '开始',
       routeCoords: null, // 数组点集合
@@ -76,7 +76,7 @@ export default {
             anchor: [0.5, 1], // 偏移位置
             // rotation: 0, // 旋转
             // size: [100, 100], // 图标大小
-            src: require('@/assets/people.png'),
+            src: require('@/assets/walking.png'),
           }),
         }),
         start: new Style({
@@ -2690,6 +2690,7 @@ export default {
     // 轨迹移动
     moveFeature(event) {
       let vectorContext = getVectorContext(event)
+      console.log(vectorContext)
       let frameState = event.frameState
       if (this.animating) {
         let elapsedTime = frameState.time - this.now
