@@ -3,6 +3,9 @@
     <!-- 地图 -->
     <div id="map" style="width: 98vw; height: 89vh"></div>
     <div id="position"></div>
+    <div style="position: absolute; top: 50px; left: 50px">
+      路程距离：{{ this.distance }}
+    </div>
   </div>
 </template>
 
@@ -18,7 +21,7 @@ import { Stroke, Style, Fill, Circle } from 'ol/style'
 import Feature from 'ol/Feature'
 import { Point, Polygon, LineString } from 'ol/geom'
 export default {
-  name: 'Home',
+  name: 'GaodeAPI',
   data() {
     return {
       map: null,
@@ -28,6 +31,7 @@ export default {
       pointsData: [],
       polygonData: [],
       lineData: [],
+      distance: null,
       pointLine: [
         {
           lineCoordinate: [],
@@ -124,44 +128,14 @@ export default {
     })
   },
   methods: {
-    // 获取路径
-    async getRoute() {
-      const { data: res } = await this.$http.get(
-        'https://restapi.amap.com/v3/direction/driving',
-        {
-          params: {
-            key: '7d9ec609c8a1442a181512523846e711',
-            origin: '104.152038,30.634342',
-            destination: '106.494789,29.612073',
-          },
-        }
-      )
-      if (res.status === '1') {
-        console.log(res.route.paths[0].distance)
-        console.log(res.route.paths[0].steps)
-        this.pointLine[0].lineCoordinate = res.route.paths[0].steps.reduce(
-          (result, curStep) => {
-            const a = curStep.polyline
-              .split(';')
-              .map((cur) => cur.split(',').map((cur) => Number(cur)))
-            result = result.concat(a)
-            return result
-          },
-          []
-        )
-        console.log(this.pointLine)
-        this.renderLineLayer(this.pointLine)
-      }
-      console.log(res)
-    },
     // 初始化map
     initMap() {
       const source = new XYZSource({
         // maxZoom: 15,
         url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7', //矢量地图（含路网，含注记）
         // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=7", // 为矢量图（含路网，不含注记）
-        // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8", //影像路图（含路网，含注记）
-        // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=7", //影像路图（含路网，不含注记）
+        // url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8', //影像路图（含路网，含注记）
+        // url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=7', //影像路图（含路网，不含注记）
         // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}", //使用高德地图图层
         // url:
         //   "https://services.arcgisonline.com/arcgis/rest/services/" +
@@ -302,6 +276,37 @@ export default {
           this.map.getTargetElement().style.cursor = ''
         }
       })
+    },
+    // 获取路径
+    async getRoute() {
+      const { data: res } = await this.$http.get(
+        'https://restapi.amap.com/v3/direction/driving',
+        {
+          params: {
+            key: '7d9ec609c8a1442a181512523846e711',
+            origin: '104.152038,30.634342',
+            destination: '106.494789,29.612073',
+          },
+        }
+      )
+      if (res.status === '1') {
+        this.distance = res.route.paths[0].distance
+        console.log(res.route.paths[0].steps)
+        this.pointLine[0].lineCoordinate = res.route.paths[0].steps.reduce(
+          (result, curStep) => {
+            const a = curStep.polyline
+              .split(';')
+              .map((cur) => cur.split(',').map((cur) => Number(cur)))
+            result = result.concat(a)
+            return result
+          },
+          []
+        )
+        console.log(this.pointLine)
+        console.log(this.pointLine[0].lineCoordinate)
+        this.renderLineLayer(this.pointLine)
+      }
+      console.log(res)
     },
   },
 }
