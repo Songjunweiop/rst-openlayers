@@ -7,18 +7,18 @@
 </template>
 
 <script>
-import "ol/ol.css"
-import { Map, View } from "ol"
-import { Vector as VectorLayer, Tile as TileLayer } from "ol/layer"
-import { transform } from "ol/proj"
-import { Vector as VectorSource, XYZ as XYZSource } from "ol/source"
-import * as olControl from "ol/control"
-import * as olInteraction from "ol/interaction"
-import { Stroke, Style, Fill, Circle } from "ol/style"
-import Feature from "ol/Feature"
-import { Point, Polygon, LineString } from "ol/geom"
+import 'ol/ol.css'
+import { Map, View } from 'ol'
+import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
+import { transform } from 'ol/proj'
+import { Vector as VectorSource, XYZ as XYZSource } from 'ol/source'
+import * as olControl from 'ol/control'
+import * as olInteraction from 'ol/interaction'
+import { Stroke, Style, Fill, Circle } from 'ol/style'
+import Feature from 'ol/Feature'
+import { Point, Polygon, LineString } from 'ol/geom'
 export default {
-  name: "Home",
+  name: 'Home',
   data() {
     return {
       map: null,
@@ -38,41 +38,41 @@ export default {
   created() {
     this.pointsData = [
       {
-        id: "1",
-        mark: "11军",
+        id: '1',
+        mark: '11军',
         coordinate: [102, 25],
       },
       {
-        id: "2",
-        mark: "2师",
+        id: '2',
+        mark: '2师',
         coordinate: [104.152038, 30.634342],
       },
       {
-        id: "3",
-        mark: "3旅",
+        id: '3',
+        mark: '3旅',
         coordinate: [106.494789, 29.612073],
       },
       {
-        id: "4",
-        mark: "4团",
+        id: '4',
+        mark: '4团',
         coordinate: [108, 30],
       },
       {
-        id: "5",
-        mark: "5营",
+        id: '5',
+        mark: '5营',
         coordinate: [106, 36],
       },
       {
-        id: "6",
-        mark: "5连",
+        id: '6',
+        mark: '5连',
         coordinate: [121, 25],
       },
     ]
     this.polygonData = [
       {
-        id: "01",
-        math: "1523m²",
-        mark: "多边形1的备注",
+        id: '01',
+        math: '1523m²',
+        mark: '多边形1的备注',
         polygonCoordinate: [
           [100, 30],
           [110, 20],
@@ -80,9 +80,9 @@ export default {
         ],
       },
       {
-        id: "02",
-        math: "666m²",
-        mark: "多边形2的备注",
+        id: '02',
+        math: '666m²',
+        mark: '多边形2的备注',
         polygonCoordinate: [
           [125, 30],
           [130, 20],
@@ -92,9 +92,9 @@ export default {
     ]
     this.lineData = [
       {
-        id: "01",
-        math: "33m",
-        mark: "11军",
+        id: '01',
+        math: '33m',
+        mark: '11军',
         lineCoordinate: [
           [103, 40],
           [105, 38],
@@ -127,23 +127,23 @@ export default {
     // 获取路径
     async getRoute() {
       const { data: res } = await this.$http.get(
-        "https://restapi.amap.com/v3/direction/driving",
+        'https://restapi.amap.com/v3/direction/driving',
         {
           params: {
-            key: "7d9ec609c8a1442a181512523846e711",
-            origin: "104.152038,30.634342",
-            destination: "106.494789,29.612073",
+            key: '7d9ec609c8a1442a181512523846e711',
+            origin: '104.152038,30.634342',
+            destination: '106.494789,29.612073',
           },
         }
       )
-      if (res.status === "1") {
+      if (res.status === '1') {
         console.log(res.route.paths[0].distance)
         console.log(res.route.paths[0].steps)
         this.pointLine[0].lineCoordinate = res.route.paths[0].steps.reduce(
           (result, curStep) => {
             const a = curStep.polyline
-              .split(";")
-              .map((cur) => cur.split(",").map((cur) => Number(cur)))
+              .split(';')
+              .map((cur) => cur.split(',').map((cur) => Number(cur)))
             result = result.concat(a)
             return result
           },
@@ -158,7 +158,7 @@ export default {
     initMap() {
       const source = new XYZSource({
         // maxZoom: 15,
-        url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7", //矢量地图（含路网，含注记）
+        url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7', //矢量地图（含路网，含注记）
         // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=7", // 为矢量图（含路网，不含注记）
         // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8", //影像路图（含路网，含注记）
         // url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=2&style=7", //影像路图（含路网，不含注记）
@@ -177,11 +177,11 @@ export default {
       })
       this.map = new Map({
         layers: [raster],
-        target: "map",
+        target: 'map',
         view: new View({
           // projection: "EPSG:4326", //正确
           // projection: "EPSG:3857",
-          center: transform([105.54859, 30.2824], "EPSG:4326", "EPSG:3857"),
+          center: transform([105.54859, 30.2824], 'EPSG:4326', 'EPSG:3857'),
           zoom: 9,
           minZoom: 2,
           maxZoom: 15,
@@ -194,8 +194,8 @@ export default {
           new olControl.FullScreen(),
           new olControl.ZoomSlider(),
           new olControl.MousePosition({
-            projection: "EPSG:4326",
-            target: "position",
+            projection: 'EPSG:4326',
+            target: 'position',
           }),
         ]),
       })
@@ -210,7 +210,7 @@ export default {
         features.push(
           new Feature({
             geometry: new Point(
-              transform(curpoint.coordinate, "EPSG:4326", "EPSG:3857")
+              transform(curpoint.coordinate, 'EPSG:4326', 'EPSG:3857')
             ),
             ...curpoint,
           })
@@ -222,13 +222,13 @@ export default {
       vectorPointSource.addFeatures(features)
 
       this.pointLayer = new VectorLayer({
-        title: "mypointLayer",
+        title: 'mypointLayer',
         source: vectorPointSource,
         style: new Style({
           image: new Circle({
             radius: 5,
-            fill: new Fill({ color: "red" }),
-            stroke: new Stroke({ color: "red", size: 1 }),
+            fill: new Fill({ color: 'red' }),
+            stroke: new Stroke({ color: 'red', size: 1 }),
           }),
         }),
       })
@@ -240,7 +240,7 @@ export default {
       let lineFeatures = []
       lineData.map((curline) => {
         const newCoord = curline.lineCoordinate.map((curCoord) => {
-          return transform(curCoord, "EPSG:4326", "EPSG:3857")
+          return transform(curCoord, 'EPSG:4326', 'EPSG:3857')
         })
         lineFeatures.push(
           new Feature({
@@ -254,10 +254,10 @@ export default {
       })
       vectorLineSource.addFeatures(lineFeatures)
       this.lineLayer = new VectorLayer({
-        title: "mylineLayer",
+        title: 'mylineLayer',
         source: vectorLineSource,
         style: new Style({
-          stroke: new Stroke({ color: "red", width: 2 }),
+          stroke: new Stroke({ color: 'red', width: 2 }),
         }),
       })
       this.map.addLayer(this.lineLayer)
@@ -268,7 +268,7 @@ export default {
       let polygonFeatures = []
       this.polygonData.map((curpolygon) => {
         const newCoordinate = curpolygon.polygonCoordinate.map((curCoord) => {
-          return transform(curCoord, "EPSG:4326", "EPSG:3857")
+          return transform(curCoord, 'EPSG:4326', 'EPSG:3857')
         })
         polygonFeatures.push(
           new Feature({
@@ -290,16 +290,16 @@ export default {
     },
     // map移入feature中事件
     setPointerMove() {
-      this.map.on("pointermove", (e) => {
+      this.map.on('pointermove', (e) => {
         var pixel = this.map.getEventPixel(e.originalEvent)
         const feature = this.map.forEachFeatureAtPixel(
           pixel,
           (feature) => feature
         )
         if (feature) {
-          this.map.getTargetElement().style.cursor = "pointer"
+          this.map.getTargetElement().style.cursor = 'pointer'
         } else {
-          this.map.getTargetElement().style.cursor = ""
+          this.map.getTargetElement().style.cursor = ''
         }
       })
     },
